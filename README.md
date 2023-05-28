@@ -1,3 +1,3 @@
 ```
-$ RUST_LOG=info cargo r 
+$ cargo r 
 ```
