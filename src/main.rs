@@ -3,6 +3,7 @@ mod server;
 
 use log::LevelFilter;
 use server::Server;
+use snafu::prelude::*;
 
 static LOGGER: ConsoleLogger = ConsoleLogger;
 
@@ -23,15 +24,22 @@ impl log::Log for ConsoleLogger {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    log::set_logger(&LOGGER)?;
+async fn main() -> Result<(), Error> {
+    log::set_logger(&LOGGER).context(LoggerSnafu)?;
     log::set_max_level(LevelFilter::Info);
 
     start_server().await;
+
     Ok(())
 }
 
 async fn start_server() {
     let server = Server::new();
     server.run().await;
+}
+
+#[derive(Debug, Snafu)]
+pub enum Error {
+    #[snafu(display("Failed to set logger: {}", source))]
+    Logger { source: log::SetLoggerError },
 }
