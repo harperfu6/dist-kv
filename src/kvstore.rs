@@ -1,32 +1,38 @@
 use std::collections::HashMap;
 
+use chashmap::CHashMap;
+
+#[derive(Clone)]
 pub struct KvElement {
     data: String,
 }
 
+#[derive(Clone)]
 pub struct KvStore {
-    container: HashMap<String, KvElement>,
+    container: CHashMap<String, KvElement>,
 }
 
 impl KvStore {
     pub fn new() -> KvStore {
         KvStore {
-            container: HashMap::new(),
+            container: CHashMap::new(),
         }
     }
 
-    pub fn set(&mut self, key: String, value: String) {
-        self.container.insert(key, KvElement { data: value });
+    pub fn set(&self, data: HashMap<String, String>) {
+        for (k, v) in data {
+            self.container.insert(k, KvElement { data: v });
+        }
     }
 
-    pub fn get(self, key: String) -> Option<String> {
+    pub fn get(&self, key: String) -> Option<String> {
         match self.container.get(&key) {
             Some(v) => Some(v.data.clone()),
             None => None,
         }
     }
 
-    pub fn drop(&mut self, key: String) {
+    pub fn drop(&self, key: String) {
         self.container.remove(&key);
     }
 }
@@ -37,15 +43,15 @@ mod tests {
 
     #[test]
     fn test_set() {
-        let mut kv = KvStore::new();
-        kv.set("key".to_string(), "value".to_string());
+        let kv = KvStore::new();
+        kv.set(HashMap::from([("key".to_string(), "value".to_string())]));
         assert_eq!(kv.get("key".to_string()), Some("value".to_string()));
     }
 
     #[test]
     fn test_drop() {
-        let mut kv = KvStore::new();
-        kv.set("key".to_string(), "value".to_string());
+        let kv = KvStore::new();
+        kv.set(HashMap::from([("key".to_string(), "value".to_string())]));
         kv.drop("key".to_string());
         assert_eq!(kv.get("key".to_string()), None);
     }

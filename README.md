@@ -1,13 +1,27 @@
-## start server
+in-memory kv store
+
+# start server
 ```
 $ cargo r 
 ```
 
-## request by client
+# request by client
+## POST data
 ```
-$ curl localhost:8080/hello/daiki
-Hello, daiki!
+$ curl -X POST -H "Content-Type: application/json" -d '{"key": "value"}' localhost:8080
+```
+## GET data
+```
+$ curl localhost:8080/{key}
+```
 
-$ curl -X POST -H "Content-Type: application/json" -d '{"name":"daiki", "age":"30"}' localhost:8080/data
-{"age":"30","name":"daiki"}
+## example
+```
+# POST DATA
+$ curl -X POST -H "Content-Type: application/json" -d '{"name":"daiki", "age":"30"}' localhost:8080
+The specified key was successfully created.
+
+# GET by key
+$ curl localhost:8080/name
+daiki
 ```

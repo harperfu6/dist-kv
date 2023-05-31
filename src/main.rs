@@ -1,6 +1,9 @@
 mod kvstore;
 mod server;
 
+use std::sync::Arc;
+
+use kvstore::KvStore;
 use log::LevelFilter;
 use server::Server;
 use snafu::prelude::*;
@@ -35,7 +38,8 @@ async fn main() -> Result<(), Error> {
 
 async fn start_server() {
     let server = Server::new();
-    server.run().await;
+    let store = Arc::new(KvStore::new());
+    server.run(store).await;
 }
 
 #[derive(Debug, Snafu)]
