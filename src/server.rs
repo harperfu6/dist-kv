@@ -2,9 +2,12 @@ use std::{collections::HashMap, net::SocketAddr, sync::Arc};
 
 use log::info;
 use reqwest::StatusCode;
-use warp::{path, reply::WithStatus, Filter};
+use serde::{Deserialize, Serialize};
+use warp::{path, Filter};
 
 use crate::kvstore::KvStore;
+
+use jsonwebtoken::{DecodingKey, Validation};
 
 pub struct Server {}
 
@@ -26,6 +29,10 @@ fn route_filter(
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     let store = warp::any().map(move || store.clone());
 
+    let auth = warp::header::optional::<String>("auth")
+        .and_then(verify_auth)
+        .untuple_one();
+
     let api_kv = warp::get()
         .and(store.clone())
         .and(path!("api" / "kv" / String))
@@ -38,7 +45,47 @@ fn route_filter(
 
     let health = warp::path("health").map(|| Ok(warp::reply::with_status("OK", StatusCode::OK)));
 
-    api_kv.or(health)
+    auth.and(api_kv).or(health)
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Claims {
+    sub: String,
+    company: String,
+    exp: usize,
+}
+
+async fn verify_auth(auth_header: Option<String>) -> Result<(), warp::Rejection> {
+    let my_claims = Claims {
+        sub: "".to_string(),
+        company: "".to_string(),
+        exp: 10000000000,
+    };
+
+    let token = jsonwebtoken::encode(
+        &jsonwebtoken::Header::default(),
+        &my_claims,
+        &jsonwebtoken::EncodingKey::from_secret("secret".as_ref()),
+    )
+    .unwrap();
+
+    match auth_header {
+        Some(auth_header) => {
+            match jsonwebtoken::decode::<Claims>(
+                // auth_header.trim_start_matches("Bearer "),
+                &token,
+                &DecodingKey::from_secret("secret".as_ref()),
+                &Validation::default(),
+            ) {
+                Ok(_) => Ok(()),
+                Err(e) => {
+                    println!("error by: {:?}", e);
+                    Err(warp::reject::custom(Error::InvalidJwt))
+                }
+            }
+        }
+        None => Err(warp::reject::custom(Error::MissingAuthHeader)),
+    }
 }
 
 async fn get_data(store: Arc<KvStore>, key: String) -> Result<impl warp::Reply, warp::Rejection> {
@@ -63,6 +110,14 @@ async fn post_data(
         StatusCode::CREATED,
     ))
 }
+
+#[derive(Debug)]
+enum Error {
+    MissingAuthHeader,
+    InvalidJwt,
+}
+
+impl warp::reject::Reject for Error {}
 
 #[cfg(test)]
 mod tests {

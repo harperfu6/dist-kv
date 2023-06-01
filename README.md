@@ -1,5 +1,11 @@
 in-memory kv store
 
+# TODO
+- [ ] auth
+- [ ] KVSの残りの機能（削除とか）
+- [ ] CLI対応
+- [ ] WebUI
+
 # start server
 ```
 $ cargo r 
