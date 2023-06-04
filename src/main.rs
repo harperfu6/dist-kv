@@ -8,7 +8,7 @@ use chrono::{DateTime, Duration, Utc};
 use configuration::{Claims, Configuration};
 use jsonwebtoken::{EncodingKey, Header};
 use kvstore::KvStore;
-use log::{info, LevelFilter};
+use log::{error, info, LevelFilter};
 use rand::Rng;
 use ring::digest;
 use server::Server;
@@ -39,8 +39,16 @@ async fn main() -> Result<(), Error> {
 
     let config_path = Path::new("config.yaml");
     // TODO: Check if config file exists and if so, read it and use the values
-    let mut config = Configuration::default();
+    let config = Configuration::default();
+    if let Err(e) = start_server(config, &config_path).await {
+        error!("Error: {}", e);
+    }
 
+    Ok(())
+}
+
+async fn start_server(config: Configuration, config_path: &Path) -> Result<(), Error> {
+    let mut config = Configuration::default();
     let secret_key = generate_secret_key();
     let jwt = issue_jwt(&secret_key, None)?;
 
@@ -54,15 +62,11 @@ async fn main() -> Result<(), Error> {
     )
     .context(WriteConfigFileSnafu)?;
 
-    start_server(config).await;
-
-    Ok(())
-}
-
-async fn start_server(configuration: Configuration) {
-    let server = Server::new(configuration);
+    let server = Server::new(config);
     let store = Arc::new(KvStore::new());
     server.run(store).await;
+
+    Ok(())
 }
 
 fn generate_secret_key() -> String {

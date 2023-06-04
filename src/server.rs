@@ -1,18 +1,15 @@
 use std::{collections::HashMap, net::SocketAddr, sync::Arc};
 
-use chrono::{DateTime, Utc};
 use log::info;
 use reqwest::StatusCode;
-use serde::{Deserialize, Serialize};
-use snafu::ResultExt;
 use warp::{path, Filter};
 
 use crate::{
-    configuration::{self, Claims, Configuration},
+    configuration::{Claims, Configuration},
     kvstore::KvStore,
 };
 
-use jsonwebtoken::{DecodingKey, Header, Validation};
+use jsonwebtoken::{DecodingKey, Validation};
 
 pub struct Server {
     configuration: Configuration,
@@ -120,8 +117,8 @@ impl warp::reject::Reject for Error {}
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::configuration::Configuration;
     use crate::{generate_secret_key, issue_jwt};
-    use configuration::Configuration;
     use lazy_static::lazy_static;
 
     lazy_static! {

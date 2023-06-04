@@ -1,10 +1,12 @@
+![dist-kv](https://github.com/harperfu6/dist-kv/actions/workflows/rust.yml/badge.svg)
+
 in-memory kv store
 
 # TODO
 - [x] auth
-- [ ] KVSの残りの機能（削除とか）
 - [ ] CLI対応
 - [ ] WebUI
+- [ ] KVSの残りの機能（削除とか）
 
 # start server
 ```
