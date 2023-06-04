@@ -1,7 +1,7 @@
 in-memory kv store
 
 # TODO
-- [ ] auth
+- [x] auth
 - [ ] KVSの残りの機能（削除とか）
 - [ ] CLI対応
 - [ ] WebUI
