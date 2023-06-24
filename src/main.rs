@@ -54,6 +54,7 @@ async fn start_server(config: Configuration, config_path: &Path) -> Result<(), E
 
     config.authentication.root_token = jwt;
     config.authentication.secret_key = secret_key;
+    // config.authentication.enabled = true; // uncomment if you want to enable authentication
 
     fs::create_dir_all(config_path.parent().unwrap()).context(CreateConfigDirSnafu)?;
     serde_yaml::to_writer(
