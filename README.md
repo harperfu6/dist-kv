@@ -3,14 +3,24 @@
 in-memory kv store
 
 # TODO
-- [x] auth
-- [ ] CLI対応
-- [ ] WebUI
-- [ ] KVSの残りの機能（削除とか）
+- クライアントがトークンを自動で使うようにする
+- WebUI
+- KVSの残りの機能（削除とか）
+
+# cd to binary
+```
+$ cd target/debug/
+```
+
+# initailize server
+- generate config file
+```
+$ ./dist-kv init
+```
 
 # start server
 ```
-$ cargo r 
+$ ./dist-kv server
 ```
 
 # request by client
